@@ -1,4 +1,4 @@
-from time import sleep
+# from time import sleep
 from selenium.webdriver import Firefox, FirefoxOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -16,13 +16,15 @@ url = r'https://www.betano.bet.br/sport/futebol/ligas/'
 estimated_fetch_time = 7
 def get_driver():
     options = FirefoxOptions()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     driver = Firefox(options=options)
     driver.implicitly_wait(estimated_fetch_time)
     return driver
 
-# <button id="onetrust-accept-btn-handler">SIM, EU ACEITO</button>
-# <button class="button-class tw-border-n tw-border-solid tw-bg-n-22-licorice tw-border-n-28-cloud-burst tw-text-white-snow tw-uppercase tw-font-bold tw-p-nm tw-rounded-s tw-w-full" data-qa="age-verification-modal-ok-button"><span>Sim</span></button>
+
+def printa(msg, out):
+    out.write(msg + "\n")
+
 def close_popups(driver):
     errors = [NoSuchElementException]
     wait = WebDriverWait(driver, timeout=6, poll_frequency=.2, ignored_exceptions=errors)
@@ -42,18 +44,33 @@ def close_popups(driver):
     # fechar painel de registramento
     x_btn_css = '.button-close'
     x_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, x_btn_css)))
-    print(x_btn.text)
     x_btn.click()
 
 def get_leagues(driver):
-    list_of_leagues = driver.find_element(By.CSS_SELECTOR, '.sport-block')
-    leagues = list_of_leagues.find_elements(By.XPATH, "./*")
+    out = open("out.txt", "w")
+    printa('init', out)
+    league_containers = driver.find_element(By.CSS_SELECTOR, '.sport-block')
+    leagues = leagues_containers.find_elements(By.XPATH, "./div")[1:-1] # filhos de .sport-block
+    league_css = 'div:nth-child(1) > div:nth-child(2)'
+    leagues = [ l.find_element(By.CSS_SELECTOR, league_css) for l in leagues ] # pai de Brasil na lista
+    i = j = 0
     for league in leagues:
-        comps = league.find_elements(By.XPATH, "./*")
+        comps = league.find_elements(By.XPATH, "./div")
         for comp in comps:
-            print(comp.get_attribute("innerHTML"))
+            # a = comp.find_element(By.CSS_SELECTOR, 'div:nth-child(1) > div:nth-child(1) > a:nth-child(2)')
+            a = comp.find_element(By.XPATH, "./div[1]/div[1]/a")
+            print(a.text)
+            printa(f'{"-"*20}\n{a.text}', out)
+            printa(f'{a.get_attribute("innerHTML")}\n{"-"*20}\n', out)
+            i += 1
+            if i == 2:
+                break
+        j += 1
+        if j == 2:
+            break
             # link = comp.find_element(By.TAG_NAME, 'a')
             # print(link.get_attribute("href"))
+    out.close()
 
 
 def main():
@@ -65,4 +82,5 @@ def main():
 
 
 if __name__ == '__main__':
+    print('init')
     main()
