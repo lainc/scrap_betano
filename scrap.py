@@ -10,12 +10,13 @@ from selenium.common.exceptions import NoSuchElementException
 
 html_header = "<html>\n<head>\n\t<title>missing images</title>\n<head>\n<body>\n"
 html_ender  = "</body>\n</html>\n"
-url = r'https://www.betano.bet.br'
+# url = r'https://www.betano.bet.br'
+url = r'https://www.betano.bet.br/sport/futebol/ligas/'
 
 estimated_fetch_time = 7
 def get_driver():
     options = FirefoxOptions()
-    # options.add_argument("--headless=new")
+    options.add_argument("--headless")
     driver = Firefox(options=options)
     driver.implicitly_wait(estimated_fetch_time)
     return driver
@@ -44,12 +45,23 @@ def close_popups(driver):
     print(x_btn.text)
     x_btn.click()
 
+def get_leagues(driver):
+    list_of_leagues = driver.find_element(By.CSS_SELECTOR, '.sport-block')
+    leagues = list_of_leagues.find_elements(By.XPATH, "./*")
+    for league in leagues:
+        comps = league.find_elements(By.XPATH, "./*")
+        for comp in comps:
+            print(comp.get_attribute("innerHTML"))
+            # link = comp.find_element(By.TAG_NAME, 'a')
+            # print(link.get_attribute("href"))
+
 
 def main():
     driver = get_driver()
     driver.get(url)
 
     close_popups(driver)
+    get_leagues(driver)
 
 
 if __name__ == '__main__':
